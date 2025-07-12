@@ -30,20 +30,22 @@ async def send_archieve(request):
         stdout=asyncio.subprocess.PIPE,
         cwd=path
     )
+    print(process.pid)
 
     try:
         while True:
             chunk = await process.stdout.read(SIZE_OF_CHUNK)
             if not chunk:
+                await response.write_eof()
                 break
             await response.write(chunk)
             logging.info('Sending archive chunk')
             await asyncio.sleep(args.delay)
-    except asyncio.CancelledError:
+    except BaseException:
+        process.kill()
         logging.warning('Download was interrupted')
     finally:
         await process.wait()
-        await response.write_eof()
         return response
 
 
