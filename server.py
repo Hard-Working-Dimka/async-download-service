@@ -43,6 +43,7 @@ async def send_archieve(request):
             await asyncio.sleep(args.delay)
     except BaseException:
         process.kill()
+        await process.communicate()
         logging.warning('Download was interrupted')
     finally:
         await process.wait()
