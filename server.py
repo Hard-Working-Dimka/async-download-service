@@ -1,6 +1,7 @@
 from aiohttp import web
 import aiofiles
 import asyncio
+import os
 
 INTERVAL_SECS = 1
 
@@ -9,6 +10,10 @@ async def send_archieve(request):
 
     archieve_name = request.match_info['archive_hash']
     path = f'test_photos/{archieve_name}'
+
+    if not os.path.exists(path):
+        raise web.HTTPNotFound(
+            text='Архив с фотографиями был удален или перемещен на другой адрес. Свяжитесь с администратором.')
 
     response = web.StreamResponse()
     response.headers['Content-Disposition'] = f'attachment; filename="Photos.zip"'
