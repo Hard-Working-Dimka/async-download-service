@@ -41,11 +41,13 @@ async def send_archieve(request):
             await response.write(chunk)
             logging.info('Sending archive chunk')
             await asyncio.sleep(args.delay)
-    except BaseException:
-        process.kill()
-        await process.communicate()
-        logging.warning('Download was interrupted')
+    except asyncio.CanceledError:
+        logging.warning('Download was interrupted by CanceledError')
     finally:
+        if process.returncode is None or process.returncode < 0:
+            process.kill()
+            await process.communicate()
+            logging.warning('Download was killed')
         await process.wait()
         return response
 
